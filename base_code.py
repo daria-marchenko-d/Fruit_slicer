@@ -3,55 +3,30 @@ import sys
 import os
 import random
 
-# 1. Global variables
-player_lives = 3  
-score = 0  
-fruits = ['apple', 'orange', 'kiwi', 'watermelon', 'lemon', 'ice', 'bomb']  
-WIDTH = 800  
-HEIGHT = 500  
-FPS = 12  
+# 1. Creating display window
+player_lives = 3
+score = 0
+fruits = ['melon', 'orange', 'pomegranate', 'guava', 'bomb']
+WIDTH = 800
+HEIGHT = 500
+FPS = 12
 
-# Colors defined using RGB tuples
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
+pygame.init()
+pygame.display.set_caption('FRUIT NINJA--DataFlair')
+gameDisplay = pygame.display.set_mode((WIDTH, HEIGHT))
+clock = pygame.time.Clock()
 
-# Initialize the game
-def init_game():
-    global gameDisplay, clock, font, background, score_text, lives_icon
-    pygame.init() 
-    pygame.display.set_caption('FRUIT NINJA--DataFlair')  
-    gameDisplay = pygame.display.set_mode((WIDTH, HEIGHT))  
-    clock = pygame.time.Clock()  
-    # Load resources
-    background = load_image('back.jpg')  
-    font = load_font('comic.ttf', 32)  
-    score_text = font.render('Score : ' + str(score), True, WHITE)  
-    lives_icon = load_image('images/white_lives.png')  
+WHITE = (255,255,255)
+BLACK = (0,0,0)
+RED = (255,0,0)
+GREEN = (0,255,0)
+BLUE = (0,0,255)
 
-    # Fill the screen with a black background
-    gameDisplay.fill(BLACK)
-
-# Load an image with error handling
-def load_image(path):
-    try:
-        return pygame.image.load(path)  
-    except pygame.error as e:
-        print(f"Error loading image {path}: {e}")  
-        sys.exit(1)  
-
-# Load a font with error handling
-def load_font(path, size):
-    try:
-        return pygame.font.Font(os.path.join(os.getcwd(), path), size)  
-    except pygame.error as e:
-        print(f"Error loading font {path}: {e}")  
-        sys.exit(1)  
-
-# Initialize the game
-init_game()
+gameDisplay.fill((BLACK))
+background = pygame.image.load('back.jpg')
+font = pygame.font.Font(os.path.join(os.getcwd(), 'comic.ttf'), 32)
+score_text = font.render('Score : ' + str(score), True, (255, 255, 255))
+lives_icon = pygame.image.load('images/white_lives.png')
 
 # 2. Generalize structure of the fruit of the dictionnary
 
