@@ -130,7 +130,32 @@ def show_gameover_screen():
             if event.type == pygame.QUIT:
                 pygame.quit()
             if event.type == pygame.KEYUP:
-                waiting = False    
+                waiting = False   
+
+#  Function to display end of game results and messages    
+def display_final_result(points, remaining_lives):
+    gameDisplay.blit (background, (0, 0))
+    draw_text(gameDisplay, "Score Final : " + str(points), 48, WIDTH /2, HEIGHT / 4)  
+    draw_text(gameDisplay, "Vies Perdues : " + str(3 - remaining_lives), 36, WIDTH / 2, HEIGHT / 2)  
+    if points >= 50:
+        message = "Ninja Expert !"
+    elif points >= 30:
+        message = "Well done!" 
+    else: 
+        message = "Keep training!"
+
+    draw_text(gameDisplay, message, 42, WIDTH / 2, HEIGHT * 3 / 4)  
+    pygame.display.flip()     
+
+    waiting = True # Wait for player action to continue 
+    while waiting:  
+        clock.tick(FPS) 
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYUP:
+                waiting = False        
 
 # 6. Game Loop
 
