@@ -6,7 +6,7 @@ import random
 # 1. Creating display window
 player_lives = 3
 score = 0
-fruits = ['melon', 'orange', 'pomegranate', 'guava', 'bomb']
+fruits = ['apple', 'orange', 'watermelon', 'lemon', 'ice', 'bomb']
 WIDTH = 800
 HEIGHT = 500
 FPS = 12
@@ -27,6 +27,42 @@ background = pygame.image.load('back.jpg')
 font = pygame.font.Font(os.path.join(os.getcwd(), 'comic.ttf'), 32)
 score_text = font.render('Score : ' + str(score), True, (255, 255, 255))
 lives_icon = pygame.image.load('images/white_lives.png')
+
+# Function to draw player lives
+
+def draw_lives(display, x, y, lives, image):
+    for i in range(lives):
+        img = pygame.image.load(image)
+        img_rect = img.get_rect()
+        img_rect.x = int(x + 35 * i)
+        img_rect.y = y
+        display.blit(img, img_rect)
+
+# Function to hide lives with a cross
+
+def hide_cross_lives(x, y):
+    gameDisplay.blit(pygame.image.load("images/red_lives.png"), (x, y)) 
+
+# Show end game screen  
+def show_gameover_screen():
+    gameDisplay.blit(background, (0, 0))         
+    draw_text(gameDisplay, "FRUIT NINJA!", 64, WIDTH / 2, HEIGHT / 4)
+    if not game_over:
+        draw_text(gameDisplay, "Score:" + str(score), 40, WIDTH / 2, 250)
+    draw_text(gameDisplay, "Press a key to begin!", 24, WIDTH /2, HEIGHT * 3 / 4)
+
+    pygame.display.flip()
+
+    waiting = True
+    while waiting:
+        clock.tick(FPS)
+
+        for envent in pygame.event.get(): # Check all pygame events
+            if event.type == pygame.QUIT: # If the user clicks on the window cross
+                pygame.quit()
+
+            if event.type == pygame.KEYUP: # If the user presses a key
+               waiting = False # Exit the waiting loop       
 
 # 2. Generalize structure of the fruit of the dictionnary
 
@@ -166,5 +202,4 @@ while game_running :
     clock.tick(FPS)
 
 pygame.quit()    
-
-#Comment
+sys.exit
