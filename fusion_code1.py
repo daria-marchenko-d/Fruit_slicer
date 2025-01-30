@@ -1,4 +1,5 @@
-import pygame, sys
+import pygame 
+import sys
 import os
 import random
 
@@ -9,7 +10,7 @@ fruits = ['apple', 'orange', 'lemon', 'kiwi', 'watermelon', 'bomb', 'ice' ]    #
 # initialize pygame and create window
 WIDTH = 800
 HEIGHT = 500
-FPS = 12                                                #controls how often the gameDisplay should refresh. In our case, it will refresh every 1/12th second
+FPS = 10                                                #controls how often the gameDisplay should refresh. In our case, it will refresh every 1/12th second
 pygame.init()
 pygame.display.set_caption('Fruit-Ninja Game -- DataFlair')
 gameDisplay = pygame.display.set_mode((WIDTH, HEIGHT))   #setting game display size
@@ -25,7 +26,7 @@ BLUE = (0,0,255)
 background = pygame.image.load('Images/background.png')                               #game background
 background =pygame.transform.scale(background, (WIDTH, HEIGHT))
 font = pygame.font.Font(os.path.join(os.getcwd(), 'comic.ttf'), 42)
-score_text = font.render('Score : ' + str(score), True, (255, 255, 255))    #score display
+score_text = font.render('Score : ' + str(score), True, WHITE)    #score display
 lives_icon = pygame.image.load('images/white_lives.png')   
 
 # Function to draw player lives
@@ -57,19 +58,26 @@ def show_gameover_screen():
     while waiting:
         clock.tick(FPS)
 
-        for envent in pygame.event.get(): # Check all pygame events
+        for event in pygame.event.get(): # Check all pygame events
             if event.type == pygame.QUIT: # If the user clicks on the window cross
                 pygame.quit()
 
             if event.type == pygame.KEYUP: # If the user presses a key
                waiting = False # Exit the waiting loop       
                      #images that shows remaining lives
+# Function to calculate points
+def  calculate_points(fruit_type, score):
+    if fruit_type == 'bomb':
+        score -= 10 # loose point for the bomb
+    else:
+        score += 1 # gain 1 points for each fruit
+    return score                     
 
 # Generalized structure of the fruit Dictionary
 def generate_random_fruits(fruit):
-    fruit_path = "images/" + fruit + ".png"
+    #fruit_path = "images/" + fruit + ".png"
     data[fruit] = {
-        'img': pygame.image.load(fruit_path),
+        'img': pygame.image.load('images/' + fruit + '.png'),
         'x' : random.randint(100,500),          #where the fruit should be positioned on x-coordinate
         'y' : 800,
         'speed_x': random.randint(-10,10),      #how fast the fruit should move in x direction. Controls the diagonal movement of fruits
@@ -77,12 +85,13 @@ def generate_random_fruits(fruit):
         'throw': False,                         #determines if the generated coordinate of the fruits is outside the gameDisplay or not. If outside, then it will be discarded
         't': 0,                               
         'hit': False,
+        'throw': random.random() >= 0.75
     }
 
-    if random.random() >= 0.75:     #Return the next random floating point number in the range [0.0, 1.0) to keep the fruits inside the gameDisplay
-        data[fruit]['throw'] = True
-    else:
-        data[fruit]['throw'] = False
+    #if random.random() >= 0.75:     #Return the next random floating point number in the range [0.0, 1.0) to keep the fruits inside the gameDisplay
+       # data[fruit]['throw'] = True
+   # else:
+        #data[fruit]['throw'] = False
 
 # Dictionary to hold the data the random fruit generation
 data = {}
@@ -102,40 +111,7 @@ def draw_text(display, text, size, x, y):
     text_rect.midtop = (x, y)
     gameDisplay.blit(text_surface, text_rect)
 
-# draw players lives
-def draw_lives(display, x, y, lives, image) :
-    for i in range(lives) :
-        img = pygame.image.load(image)
-        img_rect = img.get_rect()       #gets the (x,y) coordinates of the cross icons (lives on the the top rightmost side)
-        img_rect.x = int(x + 35 * i)    #sets the next cross icon 35pixels awt from the previous one
-        img_rect.y = y                  #takes care of how many pixels the cross icon should be positioned from top of the screen
-        display.blit(img, img_rect)
-
-# show game over display & front display
-def show_gameover_screen():
-    gameDisplay.blit(background, (0,0))
-    draw_text(gameDisplay, "FRUIT NINJA!", 90, WIDTH / 2, HEIGHT / 4)
-    if not game_over :
-        draw_text(gameDisplay,"Score : " + str(score), 50, WIDTH / 2, HEIGHT /2)
-
-    draw_text(gameDisplay, "Press a key to begin!", 64, WIDTH / 2, HEIGHT * 3 / 4)
-    pygame.display.flip()
-    waiting = True
-    while waiting:
-        clock.tick(FPS)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-            if event.type == pygame.KEYUP:
-                waiting = False
-
-# Function to calculate points
-def  calculate_points(fruit_type, score):
-    if fruit_type == 'bomb':
-        score -= 10 # loose point for the bomb
-    else:
-        score += 1 # gain 1 points for each fruit
-    return score                 
+                
 
 # Game Loop
 first_round = True
@@ -186,7 +162,7 @@ while game_running :
                 pygame.K_b: 'bomb',
                 pygame.K_SPACE: 'ice'
             }
-
+            # Mouse collision detection
             if not value['hit'] and current_position[0] > value['x'] and current_position[0] < value['x'] + 60 \
                 and current_position[1] > value['y'] and current_position[1] < value['y'] + 60:
                if key == 'bomb':
@@ -195,7 +171,7 @@ while game_running :
                    score = calculate_points(key, score) #Score Update
                score_text = font.render('Score : ' + str(score), True, WHITE)
                value['hit'] = True   
-
+            # Keyboard key collision detection
             keys = pygame.key.get_pressed()
             for k, fruit in key_fruit_map.items():
                 if keys[k] and key == fruit:
@@ -211,36 +187,6 @@ while game_running :
                
             
 
-            current_position = pygame.mouse.get_pos()   #gets the current coordinate (x, y) in pixels of the mouse
-
-            if not value['hit'] and current_position[0] > value['x'] and current_position[0] < value['x']+30 \
-                    and current_position[1] > value['y'] and current_position[1] < value['y']+30:
-                if key == 'bomb':
-                    player_lives -= 1
-                    if player_lives == 0:
-                        
-                        hide_cross_lives(690, 15)
-                    elif player_lives == 1 :
-                        hide_cross_lives(725, 15)
-                    elif player_lives == 2 :
-                        hide_cross_lives(760, 15)
-                    #if the user clicks bombs for three time, GAME OVER message should be displayed and the window should be reset
-                    if player_lives < 0 :
-                        show_gameover_screen()
-                        game_over = True
-
-                    half_fruit_path = "images/explosion.png"
-                else:
-                    half_fruit_path = "images/" + "half_" + key + ".png"
-
-                value['img'] = pygame.image.load(half_fruit_path)
-                value['speed_x'] += 10
-                if key != 'bomb' :
-                    score = calculate_points(key, score) # Score update
-                score_text = font.render('Score : ' + str(score), True, (255, 255, 255))
-                value['hit'] = True
-    else:
-        generate_random_fruits(key)
 
     pygame.display.update()
     clock.tick(FPS)      # keep loop running at the right speed (manages the frame/second. The loop should update afer every 1/12th pf the sec
