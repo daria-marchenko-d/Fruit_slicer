@@ -6,7 +6,7 @@ import random
 # 1. Creating display window
 player_lives = 3
 score = 0
-fruits = ['apple', 'orange', 'watermelon', 'lemon', 'ice', 'bomb']
+fruits = ['apple', 'orange', 'watermelon', 'lemon', 'kiwi', 'ice', 'bomb']
 WIDTH = 800
 HEIGHT = 500
 FPS = 12
@@ -23,7 +23,7 @@ GREEN = (0,255,0)
 BLUE = (0,0,255)
 
 gameDisplay.fill((BLACK))
-background = pygame.image.load('back.jpg')
+background = pygame.image.load('Images/background.png')
 font = pygame.font.Font(os.path.join(os.getcwd(), 'comic.ttf'), 32)
 score_text = font.render('Score : ' + str(score), True, (255, 255, 255))
 lives_icon = pygame.image.load('images/white_lives.png')
@@ -157,6 +157,14 @@ def display_final_result(points, remaining_lives):
             if event.type == pygame.KEYUP:
                 waiting = False        
 
+# Function to calculate points
+def  calculate_points(fruit_type, score):
+    if fruit_type == 'bomb':
+        score -= 10 # loose point for the bomb
+    else:
+        score += 5 # gain 5 points for each fruit
+    return score 
+
 # 6. Game Loop
 
 first_round = True
@@ -169,7 +177,7 @@ while game_running :
             first_round = False
         game_over = False
         player_lives = 3
-        draw_lives(gameDisplay, 690, 5, player_lives, 'images/red_lives.png')
+        draw_lives(gameDisplay, 690, 5, player_lives, 'images/white_lives.png')
         score = 0
 
     for event in pygame.event.get():
@@ -179,7 +187,7 @@ while game_running :
 
     gameDisplay.blit(background, (0, 0))
     gameDisplay.blit(score_text, (0, 0))
-    draw_lives(gameDisplay, 690, 5, player_lives, 'images/red_lives.png')
+    draw_lives(gameDisplay, 690, 5, player_lives, 'images/white_lives.png')
 
     for key, value in data.items():
         if value['throw']:
@@ -217,8 +225,8 @@ while game_running :
                 value['img'] = pygame.image.load(half_fruit_path)
                 value['speed_x'] += 10
                 if key != 'bomb' :
-                    score += 1
-                score_text = font.render('Score : ' + str(score), True, (255, 255, 255))
+                    score = calculate_points(key, score) # Score update
+                score_text = font.render('Score : ' + str(score), True, WHITE)
                 value['hit'] = True
         else:
             generate_random_fruits(key)
