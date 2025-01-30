@@ -168,7 +168,9 @@ while game_running :
                if key == 'bomb':
                    game_over = True
                else:
-                   score = calculate_points(key, score) #Score Update
+                   half_fruit_path = 'images/half_' + key + '.png'
+                   value['img'] = pygame.image.load(half_fruit_path) # Replace the image of the fruit with the image of half of the fruit
+               score = calculate_points(key, score) #Score Update    
                score_text = font.render('Score : ' + str(score), True, WHITE)
                value['hit'] = True   
             # Keyboard key collision detection
@@ -178,15 +180,14 @@ while game_running :
                     if keys == 'bomb':
                         game_over = True
                     else:
-                        score = calculate_points(key, score) #Update Score
+                        half_fruit_path = 'images/half_' + key + '.png'
+                        value['img'] = pygame.image.load(half_fruit_path) # Replace the image of the fruit with the image of half of the fruit
+                    score = calculate_points(key, score) #Update Score    
                     score_text = font.render('Score : ' + str(score), True, WHITE)  
                     value['hit'] = True         
         else:
             generate_random_fruits(key)                 
                 
-               
-            
-
 
     pygame.display.update()
     clock.tick(FPS)      # keep loop running at the right speed (manages the frame/second. The loop should update afer every 1/12th pf the sec
