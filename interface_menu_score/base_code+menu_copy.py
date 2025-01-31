@@ -8,7 +8,7 @@ import json
 
 player_lives = 3
 score = 0
-fruits = ['apple', 'orange', 'lemon', 'kiwi', 'watermelon', 'bomb', 'ice' ]    #entities in the game
+fruits = ['apple', 'oranges', 'lemons', 'kiwi', 'watermelon', 'bomb', 'ice' ]    #entities in the game
 
 # 1. Creating display window
 WIDTH = 800
@@ -16,7 +16,7 @@ HEIGHT = 500
 FPS = 20
 
 pygame.init()
-pygame.display.set_caption('FRUIT SLICER--DataFlair')
+pygame.display.set_caption('FRUIT SLICER')
 gameDisplay = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 
@@ -62,11 +62,23 @@ def draw_button(x, y, width, height, text, default_color, hover_color, action=No
 
 # ---------------------------------Fruits part------------------
 # 2. Generalize structure of the fruit of the dictionnary
+data = {}
 
 def generate_random_fruits(fruit):
-    fruit_path = "images/" + fruit + ".png"
+    
+    # fruit_path = "images/" + fruit + ".png"
+    # Changed on
+    smiley_path = f"images/{fruit}-smiley.png"
+    sliced_path = f"images/{fruit}-sliced.png"
+
+
     data[fruit] = {
-        'img': pygame.image.load(fruit_path),
+        # 'img': pygame.image.load(fruit_path),
+        # Changed on
+        'img_smiley': pygame.image.load(smiley_path),
+        'img_sliced': pygame.image.load(sliced_path),
+        'current_img': pygame.image.load(smiley_path),
+
         'x' : random.randint(100,500),          #where the fruit should be positioned on x-coordinate
         'y' : 800,
         'speed_x': random.randint(-10,10),      #how fast the fruit should move in x direction. Controls the diagonal movement of fruits
@@ -82,12 +94,9 @@ def generate_random_fruits(fruit):
         data[fruit]['throw'] = False
 
 # Dictionary to hold the data the random fruit generation
-data = {}
+
 for fruit in fruits:
     generate_random_fruits(fruit)
-
-def hide_cross_lives(x, y):
-    gameDisplay.blit(pygame.image.load("images/red_lives.png"), (x, y))
 
 # 3. Method to draw font 
 
@@ -110,7 +119,11 @@ def draw_lives(display, x, y, lives, image) :
         img_rect.y = y                  #takes care of how many pixels the cross icon should be positioned from top of the screen
         display.blit(img, img_rect)    
 
+def hide_cross_lives(x, y):
+    gameDisplay.blit(pygame.image.load("images/red_lives.png"), (x, y))
 
+def show_gameover_screen():
+    print("Game Over") 
 # ----------------------------------------------------------------Check or initialize the JSON file
 if not os.path.exists("history.json"):
     with open("history.json", "w") as file: 
@@ -253,7 +266,8 @@ pygame.mixer.music.play(-1)
 
 first_round = True
 game_over = True        
-game_running = True    
+game_running = True  
+
 while game_running :
     if game_over :
         if first_round :
@@ -269,6 +283,49 @@ while game_running :
         # checking for closing window
         if event.type == pygame.QUIT:
             game_running = False
+        
+        if event.type == pygame.KEYDOWN:
+            key_fruit_map = {
+                pygame.K_a: 'apple',
+                pygame.K_z: 'orange',
+                pygame.K_e: 'lemon',
+                pygame.K_q: 'kiwi',
+                pygame.K_s: 'watermelon',
+                pygame.K_d: 'bomb',
+                pygame.K_SPACE: 'ice'
+            }
+            if event.key in key_fruit_map:
+                fruit = key_fruit_map[event.key]
+                if fruit in data and not data[fruit]['hit']:
+                    data[fruit]['current_img'] = data[fruit]['img_sliced']['img_sliced']  # Замінюємо зображення
+                    data[fruit]['hit'] = True
+                    score += 1  # Додаємо очки
+                    score_text = font.render('Score : ' + str(score), True, (255, 255, 255))
+
+
+    current_position = pygame.mouse.get_pos()
+    for fruit, value in data.items():
+        if not value['hit'] and value['x'] < current_position[0] < value['x'] + 30 and value['y'] < current_position[1] < value['y'] + 30:
+            if fruit == 'bomb':
+                player_lives -= 1
+                if player_lives == 2:
+                    hide_cross_lives(690, 15)
+                elif player_lives == 1:
+                    hide_cross_lives(725, 15)
+                elif player_lives == 0:
+                    hide_cross_lives(760, 15)
+                    show_gameover_screen()
+                    game_over = True
+                half_fruit_path = "images/white_lives.png"
+            else:
+                half_fruit_path = "images/" + "half_" + fruit + ".png"
+
+            value['current_img'] = pygame.image.load(half_fruit_path)
+            value['hit'] = True
+            value['speed_x'] += 10
+            if fruit != 'bomb':
+                score += 1
+            score_text = font.render('Score : ' + str(score), True, (255, 255, 255))
 
     gameDisplay.blit(background, (0, 0))
     gameDisplay.blit(score_text, (0, 0))
@@ -282,20 +339,12 @@ while game_running :
             value['t'] += 1
 
             if value['y'] <= 850:
-                gameDisplay.blit(value['img'], (value['x'], value['y']))
+                gameDisplay.blit(value['current_img'], (value['x'], value['y']))
             else:
                 generate_random_fruits(key)
 
                 # add keytouch
-            key_fruit_map = {
-                pygame.K_a: 'apple',
-                pygame.K_z: 'orange',
-                pygame.K_e: 'lemon',
-                pygame.K_q: 'kiwi',
-                pygame.K_s: 'watermelon',
-                pygame.K_d: 'bomb',
-                pygame.K_SPACE: 'ice'
-            }
+            
 
             current_position = pygame.mouse.get_pos()
 
@@ -310,7 +359,7 @@ while game_running :
                     elif player_lives == 2 :
                         hide_cross_lives(760, 15)
                   
-                    if player_lives < 0 :
+                    if player_lives <= 0 :
                         show_gameover_screen()
                         game_over = True
 
