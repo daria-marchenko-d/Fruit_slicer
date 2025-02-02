@@ -1,0 +1,54 @@
+{
+    "en": {
+        "title": "FRUIT NINJA",
+        "menu": ["Level", "Rules", "Language", "Scores", "Exit"],
+        "level": ["Light level", "Hard level", "Go back"],
+        "rules": [
+            "To cut an apple - press 'a'",
+            "To cut a bomb - press 'b'",
+            "To cut an ice - press 'i'",
+            "To cut a kiwi - press 'k'",
+            "To cut a lemon - press 'l'",
+            "To cut an orange - press 'o'",
+            "To cut a watermelon - press 'w'"
+        ],
+        "Language": ["English", "French", "Ukrainian", "Go back"],
+        "history": ["Delete history", "Go back"]
+    },
+
+    "fr": {
+        "title": "FRUIT NINJA",
+        "menu": ["Niveau", "Règles", "Langue", "Scores", "Quitter"],
+        "level": ["Niveau léger", "Niveau difficile", "Retour"],
+        "rules": [
+            "Pour couper une pomme - appuyez sur 'a'",
+            "Pour couper une bombe - appuyez sur 'b'",
+            "Pour couper une glace - appuyez sur 'i'",
+            "Pour couper un kiwi - appuyez sur 'k'",
+            "Pour couper un citron - appuyez sur 'l'",
+            "Pour couper une orange - appuyez sur 'o'",
+            "Pour couper une pastèque - appuyez sur 'w'",
+            "Retour"
+        ],
+        "Language": ["Anglais", "Français", "Ukrainienne"],
+        "history": ["Supprimer l'historique", "Retour"]
+    },
+
+    "uk": {
+        "title": "ФРУКТОВИЙ НІНДЗЯ",
+        "menu": ["Рівень", "Правила", "Мова", "Рахунок", "Вихід"],
+        "level": ["Легкий", "Важкий", "Повернутися назад"],
+        "rules": [
+            "Щоб розрізати яблуко - натисніть 'a'",
+            "Щоб розрізати бомбу - натисніть 'b'",
+            "Щоб розрізати лід - натисніть 'i'",
+            "Щоб розрізати ківі - натисніть 'k'",
+            "Щоб розрізати лимон - натисніть 'l'",
+            "Щоб розрізати апельсин - натисніть 'o'",
+            "Щоб розрізати кавун - натисніть 'w'",
+            "Назад"
+        ],
+        "Language": ["Англійська", "Французька", "Українська"],
+        "history": ["Видалити історію", "Назад"]
+    }
+}

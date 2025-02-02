@@ -54,10 +54,10 @@ pygame.mixer.music.play(-1)
 
 # -------------------------------------------------------------------Showing level menu
 # Menu levels
-def menu_level():
+def menu_level(language):
     running = True
     font = pygame.font.Font(None, 36)
-    options = ["Light level", "Hard level", "Go back"]
+    options = language["level"]
     y_positions = [200, 250, 300]
     while running:
         gameDisplay.blit(background, (0, 0))
@@ -90,36 +90,31 @@ def menu_level():
                             print("Hard level selected")
                         elif index == 2:
                             # to go to the main menu
-                            main_menu()
+                            main_menu(language)
                         running = False
 
 
 # Rules
-def rules():
+def rules(language):
     running = True
     while running:
         gameDisplay.blit(background, (0, 0))
         font = pygame.font.Font(None, 36)
-        text = font.render("To cut an apple - press 'a'", True, BLACK)
-        text2 = font.render("To cut a bomb - press 'b'", True, BLACK)
-        text3 = font.render("To cut an ice - press 'i'", True, BLACK)
-        text4 = font.render("To cut a kiwi - press 'k'", True, BLACK)
-        text5 = font.render("To cut a lemon - press 'l'", True, BLACK)
-        text6 = font.render("To cut an orange - press 'o'", True, BLACK)
-        text7 = font.render("To cut a watermelon - press 'w'", True, BLACK)
-        option1 = font.render("Go back", True, YELLOW)
-        
+        options = language["rules"]  # Взяти правила з мови
+        y_positions = [90, 130, 170, 210, 250, 290, 330]
 
-        # To show the text 
-        gameDisplay.blit(text, (200, 90))
-        gameDisplay.blit(text2, (200, 130))
-        gameDisplay.blit(text3, (200, 170))
-        gameDisplay.blit(text4, (200, 210))
-        gameDisplay.blit(text5, (200, 250))
-        gameDisplay.blit(text6, (200, 290))
-        gameDisplay.blit(text7, (200, 330))
-        
-        gameDisplay.blit(option1, (350, 390))
+        for i, text in enumerate(options):
+            text_rendered = font.render(text, True, BLACK)
+            gameDisplay.blit(text_rendered, (200, y_positions[i]))
+
+        back_text = "Go back"
+        back_text_rendered = font.render(back_text, True, YELLOW) 
+        back_text_width = back_text_rendered.get_width()
+        back_text_height = back_text_rendered.get_height()
+        back_text_x = (gameDisplay.get_width() - back_text_width) // 2  
+        back_text_y = 370
+
+        gameDisplay.blit(back_text_rendered, (back_text_x, back_text_y))
 
         pygame.display.update()
         for event in pygame.event.get():
@@ -130,19 +125,25 @@ def rules():
                 mouse_x, mouse_y = event.pos
                 if 200 < mouse_x < 500:  
                     if 370 < mouse_y < 450:
-
-                        main_menu() 
+                        text_rendered = font.render(text, True, YELLOW)
+                        main_menu(language) 
 
 # Languages
-def change_language():
-    print("")
+def change_language(lang):
+    with open("languages.json", "r", encoding="utf-8") as file:
+        languages = json.load(file) 
+
+    print(f"Language set to: {lang}") 
+    return languages.get(lang, languages["en"])
 # -------------------------------------------------------------------Showing Languages menu
 # Menu languages
-def menu_lang():
+def menu_lang(language):
     running = True
     font = pygame.font.Font(None, 36)
-    options = ["English", "French", "Ukrainian", "Go back"]
+    options = language["Language"]
+    languages = ["en", "fr", "uk"]
     y_positions = [150, 200, 250, 300]
+
     while running:
         gameDisplay.blit(background, (0, 0))
         # Mouse coordinates
@@ -167,16 +168,19 @@ def menu_lang():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for text_rect, index in text_rects:
                     if text_rect.collidepoint(event.pos):
-                        if index == 0:
-                            print("English")
-                        elif index == 1:
-                            print("French")
-                        elif index == 2:
-                            print("Ukrainian")
-                        elif index == 3:
-                            # to go to the main menu
-                            main_menu()
-                        running = False              
+                        # if index == 0:
+                        #     return "en"
+                        # elif index == 1:
+                        #     return "fr"
+                        # elif index == 2:
+                        #     return "uk"
+                        # elif index == 3:
+                        #     return None      
+                        if index == 3:  # "Go back"
+                            return language  # Повертаємо поточну мову, щоб залишитися в меню
+                        else:
+                            return languages[index]
+                        running = False       
 
 
 # Scores history
@@ -207,15 +211,15 @@ def delete_history():
     del history
 
 # -------------------------------------------------------------------Showing scores history menu
-def menu_history():
+def menu_history(language):
     running = True
     font = pygame.font.Font(None, 36)
-    options = ["Delete history:", "Go back"]
+    options = language["history"]
     y_positions = [200, 250]
 
     while running:
         gameDisplay.blit(background, (0, 0)) 
-        # Отримуємо координати мишки
+         # Mouse coordinates
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
         def read_history():
@@ -257,28 +261,31 @@ def menu_history():
                             delete_history()
                             print("The history is deleted")
                         elif index == 1:
-                            main_menu()
+                            main_menu(language)
                         running = False
 
 
 
 # ---------------------------------------------------------------------Showing the menu
-def main_menu():
+def main_menu(language):
     running = True
     font = pygame.font.Font(None, 36)
-    options = ["Level", "Rules", "Language", "Scores", "Exit"]
-    y_positions = [150, 200, 250, 300, 350]
+    # options = language["menu"]
+    # y_positions = [150, 200, 250, 300, 350]
+
 
     while running:
+        options = language["menu"]
+        y_positions = [150, 200, 250, 300, 350]
+
         gameDisplay.blit(background, (0, 0)) 
-        # Отримуємо координати мишки
+         # Mouse coordinates
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
-        # Відображення кожного пункту в центрі екрана
+        # Center text
         text_rects = []
         for i, text in enumerate(options):
-            text_color = BLACK if y_positions[i] - 15 < mouse_y < y_positions[i] + 15 else YELLOW
-            rendered_text = font.render(text, True, text_color)
+            rendered_text = font.render(text, True, YELLOW)
             text_rect = rendered_text.get_rect(center=(WIDTH // 2, y_positions[i]))
             gameDisplay.blit(rendered_text, text_rect)
             text_rects.append((text_rect, i))
@@ -293,23 +300,28 @@ def main_menu():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for text_rect, index in text_rects:
                     if text_rect.collidepoint(event.pos):
+                        print(f"Main menu option {options[index]} selected.")
                         if index == 0:
-                            menu_level()
+                            menu_level(language)
                         elif index == 1:
-                            rules()
+                            rules(language)
                         elif index == 2:
-                            menu_lang()
+                            new_language = menu_lang(language)
+                            if new_language != language:
+                                language = change_language(new_language)  # Тепер передаємо нову мову
                         elif index == 3:
-                            menu_history()
+                            menu_history(language)
                         elif index == 4:
-                            quit_game()
-                        running = False
+                            quit_game(language)
+                        # running = False
+                        pygame.display.flip()
         
-def quit_game():
+def quit_game(language):
     pygame.quit()
     sys.exit()
 
 
 # Run the menu
-main_menu()    
+language = change_language("en")
+main_menu(language)    
 pygame.quit()
