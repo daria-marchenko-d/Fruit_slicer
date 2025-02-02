@@ -74,25 +74,29 @@ def  calculate_points(fruit_type, score):
     return score                     
 
 # Generalized structure of the fruit Dictionary
-def generate_random_fruits(fruit):
-    #fruit_path = "images/" + fruit + ".png"
+def generate_random_fruits(fruit, speed_multiplier=1):
     data[fruit] = {
         'img': pygame.image.load('images/' + fruit + '.png'),
-        'x' : random.randint(100,500),          #where the fruit should be positioned on x-coordinate
-        'y' : 800,
-        'speed_x': random.randint(-10,10),      #how fast the fruit should move in x direction. Controls the diagonal movement of fruits
-        'speed_y': random.randint(-90, -60),    #control the speed of fruits in y-directionn ( UP )
-        'throw': False,                         #determines if the generated coordinate of the fruits is outside the gameDisplay or not. If outside, then it will be discarded
-        't': 0,                               
+        'x': random.randint(0, WIDTH - 100),  # Positionner le fruit sur toute la largeur de l'écran
+        'y': HEIGHT,  # Initialiser les fruits en bas de l'écran
+        'speed_x': random.randint(-10, 10) * speed_multiplier,  # Vitesse en x pour un mouvement diagonal
+        'speed_y': -random.randint(45, 55) * speed_multiplier,  # Vitesse verticale pour les faire monter
+        't': 0,
         'hit': False,
         'throw': random.random() >= 0.75
     }
 
-    #if random.random() >= 0.75:     #Return the next random floating point number in the range [0.0, 1.0) to keep the fruits inside the gameDisplay
-       # data[fruit]['throw'] = True
-   # else:
-        #data[fruit]['throw'] = False
+def update_fruit_position(value):
+    value['x'] += value['speed_x']
+    value['y'] += value['speed_y']
+    value['speed_y'] += (1 * value['t'])  # Simuler l'effet de gravité
+    value['t'] += 1
 
+    # Inverser la direction de la vitesse verticale après avoir atteint le sommet de l'écran
+    if value['y'] <= 0:  # Si le fruit atteint le sommet de l'écran
+        value['speed_y'] = abs(value['speed_y'])  # Faire redescendre les fruits
+    elif value['y'] >= HEIGHT:  # Si le fruit atteint le bas de l'écran
+        value['speed_y'] = -abs(value['speed_y'])  # Faire remonter les fruits   
 # Dictionary to hold the data the random fruit generation
 data = {}
 for fruit in fruits:
@@ -110,9 +114,48 @@ def draw_text(display, text, size, x, y):
     text_rect = text_surface.get_rect()
     text_rect.midtop = (x, y)
     gameDisplay.blit(text_surface, text_rect)
+   
 
-                
+def Light_level():
+    global game_running, game_over, first_round, player_lives, score, start_time, speed_multiplier, score_text
 
+    # Initialiser le compteur de temps et le multiplicateur de vitesse
+    start_time = pygame.time.get_ticks()
+    speed_multiplier = 1  # Vitesse initiale constante
+    score = 0  # Initialiser le score
+    score_text = font.render('Score : ' + str(score), True, WHITE)  # Initialiser score_text
+def Hard_level():
+    global game_running, game_over, first_round, player_lives, score, start_time, speed_multiplier, score_text
+    # Initialize the time counter and speed multiplier
+    start_time = pygame.time.get_ticks()
+    speed_multiplier = 1 # Slow initial speed
+    score = 0
+    score_text = font.render('Score : ' + str(score), True, WHITE)  # Initialize score_text
+
+
+def show_menu():
+    gameDisplay.blit(background, (0, 0))
+    draw_text(gameDisplay, "FRUIT NINJA!", 64, WIDTH / 2, HEIGHT / 4)
+    draw_text(gameDisplay, "Press 1 for Light Level", 40, WIDTH / 2, HEIGHT / 2)
+    draw_text(gameDisplay, "Press 2 for Hard Level", 40, WIDTH / 2, HEIGHT / 2 + 50)
+    pygame.display.flip()
+    waiting = True
+    while waiting:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_1:
+                    waiting = False
+                    Light_level()
+                elif event.key == pygame.K_2:
+                    waiting = False
+                    Hard_level()
+
+# Afficher le menu principal
+show_menu()     
+    
 # Game Loop
 first_round = True
 game_over = True        #terminates the game While loop if more than 3-Bombs are cut
@@ -126,6 +169,9 @@ while game_running :
         player_lives = 3
         draw_lives(gameDisplay, 690, 5, player_lives, 'images/red_lives.png')
         score = 0
+        start_time = pygame.time.get_ticks() # Reset time counter
+        speed_multiplier = 1 # Reset speed multiplier 
+        speed_text = font.render('Score :' + str(score), True, WHITE)
 
     for event in pygame.event.get():
         # checking for closing window
@@ -134,6 +180,13 @@ while game_running :
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 game_running = False  
+            # Add more actions for specific keys here  
+
+    # Gradually increase the speed of the fruits every 10 seconds
+    elapsed_time = (pygame.time.get_ticks() - start_time) / 1000 # Elapsed time in seconds
+    if elapsed_time > 10:
+        speed_multiplier += 0.1  # Increase speed slightly
+        start_time = pygame.time.get_ticks()  # Reset time counter       
 
     gameDisplay.blit(background, (0, 0))
     gameDisplay.blit(score_text, (0, 0))
@@ -141,18 +194,23 @@ while game_running :
 
     for key, value in data.items():
         if value['throw']:
-            value['x'] += value['speed_x']          #moving the fruits in x-coordinates
+            update_fruit_position(value)
+            '''value['x'] += value['speed_x']          #moving the fruits in x-coordinates
             value['y'] += value['speed_y']          #moving the fruits in y-coordinate
             value['speed_y'] += (1 * value['t'])    #increasing y-corrdinate
-            value['t'] += 1                         #increasing speed_y for next loop
+            value['t'] += 1 '''                        #increasing speed_y for next loop
 
-            if value['y'] <= 800:
+            if value['y'] <= HEIGHT:
                 gameDisplay.blit(value['img'], (value['x'], value['y']))    #displaying the fruit inside screen dynamically
             else:
-                generate_random_fruits(key)
+                 if value['y'] > HEIGHT:
+                    if value['hit']: 
+                        generate_random_fruits(key, speed_multiplier) # Return the fruit to its original state with the new speed
+                    else:
+                        generate_random_fruits(key, speed_multiplier) # Generate new fruit with new speed   
 
             current_position = pygame.mouse.get_pos()
-             # add keytouch
+            # Dictionary to map keyboard keys to fruits
             key_fruit_map = {
                 pygame.K_a: 'apple',
                 pygame.K_o: 'orange',
@@ -169,7 +227,10 @@ while game_running :
                    game_over = True
                else:
                    half_fruit_path = 'images/half_' + key + '.png'
-                   value['img'] = pygame.image.load(half_fruit_path) # Replace the image of the fruit with the image of half of the fruit
+                   if os.path.exists(half_fruit_path):
+                       value['img'] = pygame.image.load(half_fruit_path) # Replace the image of the fruit with the image of half of the fruit
+                   else:
+                       print(f"Image not found: {half_fruit_path}")    
                score = calculate_points(key, score) #Score Update    
                score_text = font.render('Score : ' + str(score), True, WHITE)
                value['hit'] = True   
@@ -177,20 +238,26 @@ while game_running :
             keys = pygame.key.get_pressed()
             for k, fruit in key_fruit_map.items():
                 if keys[k] and key == fruit:
-                    if keys == 'bomb':
+                    if key == 'bomb':
                         game_over = True
                     else:
                         half_fruit_path = 'images/half_' + key + '.png'
-                        value['img'] = pygame.image.load(half_fruit_path) # Replace the image of the fruit with the image of half of the fruit
+                        if os.path.exists(half_fruit_path):
+                            value['img'] = pygame.image.load(half_fruit_path) # Replace the image of the fruit with the image of half of the fruit
+                        else:
+                            print(f"Image not found: {half_fruit_path}")    
                     score = calculate_points(key, score) #Update Score    
                     score_text = font.render('Score : ' + str(score), True, WHITE)  
-                    value['hit'] = True         
-        else:
-            generate_random_fruits(key)                 
-                
-
-    pygame.display.update()
-    clock.tick(FPS)      # keep loop running at the right speed (manages the frame/second. The loop should update afer every 1/12th pf the sec
+                    value['hit'] = True   
                         
+        else:
+            generate_random_fruits(key, speed_multiplier)   
+            
+    pygame.display.update()
+    clock.tick(FPS)      # keep loop running at the right speed (manages the frame/second. The loop should update afer every 1/12th pf the second)
+
 
 pygame.quit()
+sys.exit()
+
+
