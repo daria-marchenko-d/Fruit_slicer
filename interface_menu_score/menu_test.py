@@ -28,8 +28,8 @@ YELLOW = (255, 200, 50)
 
 # ----------------------------------------------------------------Check or initialize the JSON file
 if not os.path.exists("history.json"):
-    with open("history.json", "w", ensure_ascii=False, encoding='utf-8') as file: 
-        json.dump({"scores": []}, file, indent=4)  # Initialize with an empty structure
+    with open("history.json", "w") as file: 
+        json.dump({"scores": []}, file)  # Initialize with an empty structure
 
 
 #------------------------------------------------------------------ Background
@@ -52,47 +52,40 @@ win_sound = pygame.mixer.Sound("sounds/fanfare.mp3")
 
 pygame.mixer.music.play(-1)
 
-# -------------------------------------------------------------------Showing level menu
+
+# --------------------------------------------------------------------Function for button
+def draw_button(x, y, width, height, text, default_color, hover_color, action=None, radius=15, padding=5):
+    # Get mouse position and check if clicked
+    mouse = pygame.mouse.get_pos()
+    click = pygame.mouse.get_pressed()
+
+    # Define the button area as a rectangle
+    button_rect = pygame.Rect(x, y, width, height)
+
+
+    # Check if the mouse is within the button area
+    if button_rect.collidepoint(mouse):
+        pygame.draw.rect(gameDisplay, hover_color, button_rect)  # Show hover color
+        
+        # Check if the button was clicked (on left mouse button press)
+        if click[0] == 1 and action is not None:
+            pygame.time.delay(150)  # Delay to avoid multiple clicks in quick succession
+            action()  # Execute action bound to the button
+    else:
+        pygame.draw.rect(gameDisplay, default_color, button_rect, border_radius=radius)  # Default button color
+
+    # Render the button text and place it centered in the button
+    text_surface = font.render(text, True, BLACK)
+    text_rect = text_surface.get_rect(center=(x + width // 2, y + height // 2))
+    gameDisplay.blit(text_surface, text_rect)
+
+# Languages
+def change_language():
+    print("")
+
 # Menu levels
 def menu_level():
-    running = True
-    font = pygame.font.Font(None, 36)
-    options = ["Light level", "Hard level", "Go back"]
-    y_positions = [200, 250, 300]
-    while running:
-        gameDisplay.blit(background, (0, 0))
-        
-        # Mouse coordinates
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-
-        # Center text
-        text_rects = []
-        for i, text in enumerate(options):
-            text_color = BLACK if y_positions[i] - 15 < mouse_y < y_positions[i] + 15 else YELLOW
-            rendered_text = font.render(text, True, text_color)
-            text_rect = rendered_text.get_rect(center=(WIDTH // 2, y_positions[i]))
-            gameDisplay.blit(rendered_text, text_rect)
-            text_rects.append((text_rect, i))
-
-        pygame.display.update()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                for text_rect, index in text_rects:
-                    if text_rect.collidepoint(event.pos):
-                        if index == 0:
-                            print("Light level selected")
-                        elif index == 1:
-                            print("Hard level selected")
-                        elif index == 2:
-                            # to go to the main menu
-                            main_menu()
-                        running = False
-
+    print("")
 
 # Rules
 def rules():
@@ -107,7 +100,7 @@ def rules():
         text5 = font.render("To cut a lemon - press 'l'", True, BLACK)
         text6 = font.render("To cut an orange - press 'o'", True, BLACK)
         text7 = font.render("To cut a watermelon - press 'w'", True, BLACK)
-        option1 = font.render("Go back", True, YELLOW)
+        # option1 = font.render("Go back", True, YELLOW)
         
 
         # To show the text 
@@ -118,8 +111,8 @@ def rules():
         gameDisplay.blit(text5, (200, 250))
         gameDisplay.blit(text6, (200, 290))
         gameDisplay.blit(text7, (200, 330))
-        
-        gameDisplay.blit(option1, (350, 390))
+        draw_button(200, 370, 200, 50, "Main menu", YELLOW, GREEN, main_menu)
+        # gameDisplay.blit(option1, (200, 390))
 
         pygame.display.update()
         for event in pygame.event.get():
@@ -133,177 +126,99 @@ def rules():
 
                         main_menu() 
 
-# Languages
-def change_language():
-    print("")
-# -------------------------------------------------------------------Showing Languages menu
+
 # Menu languages
 def menu_lang():
     running = True
-    font = pygame.font.Font(None, 36)
-    options = ["English", "French", "Ukrainian", "Go back"]
-    y_positions = [150, 200, 250, 300]
-    while running:
-        gameDisplay.blit(background, (0, 0))
-        # Mouse coordinates
-        mouse_x, mouse_y = pygame.mouse.get_pos()
+    try:
+        while running: 
+            # Clear the screen each frame
+                gameDisplay.blit(background, (0, 0))  
 
-        # Center text
-        text_rects = []
-        for i, text in enumerate(options):
-            text_color = BLACK if y_positions[i] - 15 < mouse_y < y_positions[i] + 15 else YELLOW
-            rendered_text = font.render(text, True, text_color)
-            text_rect = rendered_text.get_rect(center=(WIDTH // 2, y_positions[i]))
-            gameDisplay.blit(rendered_text, text_rect)
-            text_rects.append((text_rect, i))
+                # Corrected button positions (using numbers for coordinates)
+                draw_button(300, 150, 200, 50, "English", YELLOW, GREEN)
+                draw_button(300, 220, 200, 50, "French", YELLOW, GREEN)
+                draw_button(300, 290, 200, 50, "Ukrainian", YELLOW, GREEN, change_language)
+                draw_button(300, 360, 200, 50, "Main menu", YELLOW, GREEN, main_menu)
 
-        pygame.display.update()
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                for text_rect, index in text_rects:
-                    if text_rect.collidepoint(event.pos):
-                        if index == 0:
-                            print("English")
-                        elif index == 1:
-                            print("French")
-                        elif index == 2:
-                            print("Ukrainian")
-                        elif index == 3:
-                            # to go to the main menu
-                            main_menu()
-                        running = False              
+                pygame.display.update()
+                clock.tick(FPS)
+    except KeyboardInterrupt:
+        print("Finish")
 
 
-# Scores history
+
+
+
 # Initialize history
 history = []
 
+
 def write_json(name, bomb, lives, result):
-    with open("history.json", "r+", encoding='utf-8') as file:
+    with open("history.json", "r+") as file:
         data = json.load(file)  # Charge les données existantes
         if name is None and lives is None and bomb is None:
             # Cas d'une expression brute
             data["scores"].append({
-                "name": name,  
+                "expression": result,  # Enregistre l'expression brute avec son résultat
                 "result": result
             })
         else:
             # Cas classique
             data["scores"].append({
+                "fails": bomb,
                 "name": name,
                 "lives": lives,
-                "fails": bomb,
                 "result": result
             })
         file.seek(0)  # Retourne au début du fichier
-        json.dump(data, file, ensure_ascii=False, indent=4)  # Écrit les nouvelles données
+        json.dump(data, file, indent=4)  # Écrit les nouvelles données
 
-def delete_history():
-    del history
 
-# -------------------------------------------------------------------Showing scores history menu
-def menu_history():
-    running = True
-    font = pygame.font.Font(None, 36)
-    options = ["Delete history:", "Go back"]
-    y_positions = [200, 250]
-
-    while running:
-        gameDisplay.blit(background, (0, 0)) 
-        # Отримуємо координати мишки
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-
-        def read_history():
-            with open("history.json", "r", encoding='utf-8') as file:
-                data = json.load(file)  # Charge les données de l'historique
-                if data["scores"]:
-                    print("\nScore History:")
-
-                    # for calc in data["scores"]:
-                    #     if "expression" in calc:
-                    #         # Affiche une expression brute
-                    #         print(f"Expression: {calc['expression']} = {calc['result']}")
-                    #     else:
-                    #         # Affiche un calcul classique
-                    #         print(f"{calc['name: ']} {calc['fails']} {calc['lives']} = {calc['result']}")
+def read_history():
+    with open("history.json", "r") as file:
+        data = json.load(file)  # Charge les données de l'historique
+        if data["scores"]:
+            print("\nScore History:")
+            for calc in data["scores"]:
+                if "expression" in calc:
+                    # Affiche une expression brute
+                    print(f"Expression: {calc['expression']} = {calc['result']}")
                 else:
-                    print("No scores found in history.")
-        text_rects = []
-        for i, text in enumerate(options):
-            text_color = BLACK if y_positions[i] - 15 < mouse_y < y_positions[i] + 15 else YELLOW
-            rendered_text = font.render(text, True, text_color)
-            text_rect = rendered_text.get_rect(center=(WIDTH // 2, y_positions[i]))
-            gameDisplay.blit(rendered_text, text_rect)
-            text_rects.append((text_rect, i))
-
-
-
-        pygame.display.update()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                for text_rect, index in text_rects:
-                    if text_rect.collidepoint(event.pos):
-                        if index == 0:
-                            delete_history()
-                            print("The history is deleted")
-                        elif index == 1:
-                            main_menu()
-                        running = False
-
-
+                    # Affiche un calcul classique
+                    print(f"{calc['name: ']} {calc['fails']} {calc['lives']} = {calc['result']}")
+        else:
+            print("No scores found in history.")
 
 # ---------------------------------------------------------------------Showing the menu
+
 def main_menu():
     running = True
-    font = pygame.font.Font(None, 36)
-    options = ["Level", "Rules", "Language", "Scores", "Exit"]
-    y_positions = [150, 200, 250, 300, 350]
+    try:
+        while running:
+            # Clear the screen each frame
+            gameDisplay.blit(background, (0, 0))  
 
-    while running:
-        gameDisplay.blit(background, (0, 0)) 
-        # Отримуємо координати мишки
-        mouse_x, mouse_y = pygame.mouse.get_pos()
+            # Corrected button positions (using numbers for coordinates)
+            draw_button(300, 80, 200, 50, "The level", YELLOW, GREEN, menu_level)
+            draw_button(300, 150, 200, 50, "Play", YELLOW, GREEN)
+            draw_button(300, 220, 200, 50, "Rules", YELLOW, GREEN, rules)
+            draw_button(300, 290, 200, 50, "Language", YELLOW, GREEN, menu_lang)
+            draw_button(300, 360, 200, 50, "Exit", YELLOW, GREEN, quit_game)
 
-        # Відображення кожного пункту в центрі екрана
-        text_rects = []
-        for i, text in enumerate(options):
-            text_color = BLACK if y_positions[i] - 15 < mouse_y < y_positions[i] + 15 else YELLOW
-            rendered_text = font.render(text, True, text_color)
-            text_rect = rendered_text.get_rect(center=(WIDTH // 2, y_positions[i]))
-            gameDisplay.blit(rendered_text, text_rect)
-            text_rects.append((text_rect, i))
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
 
-        pygame.display.update()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                for text_rect, index in text_rects:
-                    if text_rect.collidepoint(event.pos):
-                        if index == 0:
-                            menu_level()
-                        elif index == 1:
-                            rules()
-                        elif index == 2:
-                            menu_lang()
-                        elif index == 3:
-                            menu_history()
-                        elif index == 4:
-                            quit_game()
-                        running = False
+            pygame.display.update()
+            clock.tick(FPS)
+    except KeyboardInterrupt:
+        print("Finish")
         
 def quit_game():
     pygame.quit()
