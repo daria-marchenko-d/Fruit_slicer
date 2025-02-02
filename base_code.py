@@ -184,6 +184,9 @@ while game_running :
 
         if event.type == pygame.QUIT:
             game_running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                game_running = False    
 
     gameDisplay.blit(background, (0, 0))
     gameDisplay.blit(score_text, (0, 0))
