@@ -68,19 +68,20 @@ def show_gameover_screen():
 # Function to calculate points
 def  calculate_points(fruit_type, score):
     if fruit_type == 'bomb':
-        score -= 10 # loose point for the bomb
+        score -= player_lives # loose point for the bomb
     else:
         score += 1 # gain 1 points for each fruit
-    return score                     
+    return score 
+
 
 # Generalized structure of the fruit Dictionary
 def generate_random_fruits(fruit, speed_multiplier=1):
     data[fruit] = {
         'img': pygame.image.load('images/' + fruit + '.png'),
-        'x': random.randint(0, WIDTH - 100),  # Positionner le fruit sur toute la largeur de l'écran
-        'y': HEIGHT,  # Initialiser les fruits en bas de l'écran
-        'speed_x': random.randint(-10, 10) * speed_multiplier,  # Vitesse en x pour un mouvement diagonal
-        'speed_y': -random.randint(45, 55) * speed_multiplier,  # Vitesse verticale pour les faire monter
+        'x': random.randint(0, WIDTH - 100),  # Position the fruit across the entire width of the screen
+        'y': HEIGHT,  # Initialize fruits at the bottom of the screen
+        'speed_x': random.randint(-10, 10) * speed_multiplier,  # Speed ​​in x for a diagonal movement
+        'speed_y': -random.randint(45, 55) * speed_multiplier,  # Vertical speed to make them go up
         't': 0,
         'hit': False,
         'throw': random.random() >= 0.75
@@ -89,14 +90,14 @@ def generate_random_fruits(fruit, speed_multiplier=1):
 def update_fruit_position(value):
     value['x'] += value['speed_x']
     value['y'] += value['speed_y']
-    value['speed_y'] += (1 * value['t'])  # Simuler l'effet de gravité
+    value['speed_y'] += (1 * value['t'])  # Simulate the gravity effect
     value['t'] += 1
 
-    # Inverser la direction de la vitesse verticale après avoir atteint le sommet de l'écran
-    if value['y'] <= 0:  # Si le fruit atteint le sommet de l'écran
-        value['speed_y'] = abs(value['speed_y'])  # Faire redescendre les fruits
-    elif value['y'] >= HEIGHT:  # Si le fruit atteint le bas de l'écran
-        value['speed_y'] = -abs(value['speed_y'])  # Faire remonter les fruits   
+    # Reverse vertical speed direction after reaching the top of the screen
+    if value['y'] <= 0:  # If the fruit reaches the top of the screen
+        value['speed_y'] = abs(value['speed_y'])  # Bring the fruits back down
+    elif value['y'] >= HEIGHT:  # If the fruit reaches the bottom of the screen
+        value['speed_y'] = -abs(value['speed_y'])  # Bringing up the fruits  
 # Dictionary to hold the data the random fruit generation
 data = {}
 for fruit in fruits:
@@ -119,16 +120,16 @@ def draw_text(display, text, size, x, y):
 def Light_level():
     global game_running, game_over, first_round, player_lives, score, start_time, speed_multiplier, score_text
 
-    # Initialiser le compteur de temps et le multiplicateur de vitesse
+   # Initialize the time counter and speed multiplier
     start_time = pygame.time.get_ticks()
-    speed_multiplier = 1  # Vitesse initiale constante
-    score = 0  # Initialiser le score
-    score_text = font.render('Score : ' + str(score), True, WHITE)  # Initialiser score_text
+    speed_multiplier = 1 # Constant initial velocity
+    score = 0  # Initialize the score
+    score_text = font.render('Score : ' + str(score), True, WHITE)  # Initialize the score_text
 def Hard_level():
     global game_running, game_over, first_round, player_lives, score, start_time, speed_multiplier, score_text
     # Initialize the time counter and speed multiplier
     start_time = pygame.time.get_ticks()
-    speed_multiplier = 1 # Slow initial speed
+    speed_multiplier = 2 # Slow initial speed
     score = 0
     score_text = font.render('Score : ' + str(score), True, WHITE)  # Initialize score_text
 
@@ -153,7 +154,7 @@ def show_menu():
                     waiting = False
                     Hard_level()
 
-# Afficher le menu principal
+# Show main menu
 show_menu()     
     
 # Game Loop
@@ -195,10 +196,10 @@ while game_running :
     for key, value in data.items():
         if value['throw']:
             update_fruit_position(value)
-            '''value['x'] += value['speed_x']          #moving the fruits in x-coordinates
+            value['x'] += value['speed_x']          #moving the fruits in x-coordinates
             value['y'] += value['speed_y']          #moving the fruits in y-coordinate
             value['speed_y'] += (1 * value['t'])    #increasing y-corrdinate
-            value['t'] += 1 '''                        #increasing speed_y for next loop
+            value['t'] += 1                        #increasing speed_y for next loop
 
             if value['y'] <= HEIGHT:
                 gameDisplay.blit(value['img'], (value['x'], value['y']))    #displaying the fruit inside screen dynamically
@@ -259,5 +260,4 @@ while game_running :
 
 pygame.quit()
 sys.exit()
-
 
