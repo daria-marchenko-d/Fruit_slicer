@@ -67,7 +67,7 @@ def generate_random_fruits(fruit, data):
             'img_sliced': pygame.transform.scale(pygame.image.load(sliced_path), original_size),
             'current_img': pygame.transform.scale(pygame.image.load(smiley_path), original_size),
             'x' : random.randint(100,500),
-            'y' : random.randint(-50, 20),
+            'y' : random.randint(-100, 20),
             'speed_x': random.randint(-10,10),
             'speed_y': random.randint(-90, -60),
             'throw': random.random() >= 0.75,

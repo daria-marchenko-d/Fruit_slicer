@@ -38,7 +38,7 @@ background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
 font = pygame.font.Font(os.path.join(os.getcwd(), 'comic.ttf'), 42)
 score_text = font.render('Score : ' + str(score), True, (255, 255, 255))
-# lives_icon = pygame.image.load('images/white_lives.png')
+lives_icon = pygame.image.load('images/white_lives.png')
 
 # Add sounds and music
 music = pygame.mixer.music.load("sounds/music-game.mp3")
@@ -59,6 +59,8 @@ def menu_level(language):
     font = pygame.font.Font(os.path.join(os.getcwd(), 'comic.ttf'), 42)
     options = language["level"]
     y_positions = [200, 250, 300]
+    selected_level = None
+
     while running:
         gameDisplay.blit(background, (0, 0))
         
@@ -86,12 +88,21 @@ def menu_level(language):
                     if text_rect.collidepoint(event.pos):
                         if index == 0:
                             print("Light level selected")
+                            selected_level = "light"
                         elif index == 1:
                             print("Hard level selected")
+                            selected_level = "hard"
                         elif index == 2:
                             # to go to the main menu
                             main_menu(language)
-                        running = False
+                            running = False
+                            break
+                        if selected_level:
+                            running = False  # Break the cycle
+                            break
+        if not running: # If we need to go out from cycle
+            break
+    return selected_level
 
 
 # Rules
@@ -101,20 +112,11 @@ def rules(language):
         gameDisplay.blit(background, (0, 0))
         font = pygame.font.Font(os.path.join(os.getcwd(), 'comic.ttf'), 32)
         options = language["rules"]  # Взяти правила з мови
-        y_positions = [90, 130, 170, 210, 250, 290, 330]
+        y_positions = [90, 130, 170, 210, 250, 290, 330, 370]
 
         for i, text in enumerate(options):
             text_rendered = font.render(text, True, BLACK)
             gameDisplay.blit(text_rendered, (200, y_positions[i]))
-
-        back_text = "Go back"
-        back_text_rendered = font.render(back_text, True, YELLOW) 
-        back_text_width = back_text_rendered.get_width()
-        back_text_height = back_text_rendered.get_height()
-        back_text_x = (gameDisplay.get_width() - back_text_width) // 2  
-        back_text_y = 370
-
-        gameDisplay.blit(back_text_rendered, (back_text_x, back_text_y))
 
         pygame.display.update()
         for event in pygame.event.get():
@@ -127,6 +129,7 @@ def rules(language):
                     if 370 < mouse_y < 450:
                         text_rendered = font.render(text, True, YELLOW)
                         main_menu(language) 
+                        running = False
 
 # Languages
 def change_language(lang):
@@ -167,29 +170,18 @@ def menu_lang(language):
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for text_rect, index in text_rects:
-                    if text_rect.collidepoint(event.pos):
-                        # if index == 0:
-                        #     return "en"
-                        # elif index == 1:
-                        #     return "fr"
-                        # elif index == 2:
-                        #     return "uk"
-                        # elif index == 3:
-                        #     return None      
+                    if text_rect.collidepoint(event.pos):   
                         if index == 3:  # "Go back"
-                            return language  # Повертаємо поточну мову, щоб залишитися в меню
+                            return language  
                         else:
                             return languages[index]
-                        running = False       
+                running = False       
 
 
 # Scores history
-# Initialize history
-history = []
-
 def write_json(name, bomb, lives, result):
     with open("history.json", "r+", encoding='utf-8') as file:
-        data = json.load(file)  # Charge les données existantes
+        data = json.load(file)  
         if name is None and lives is None and bomb is None:
             # Cas d'une expression brute
             data["scores"].append({
@@ -249,8 +241,6 @@ def menu_history(language):
             gameDisplay.blit(rendered_text, text_rect)
             text_rects.append((text_rect, i))
 
-
-
         pygame.display.update()
 
         for event in pygame.event.get():
@@ -274,13 +264,10 @@ def menu_history(language):
 def main_menu(language):
     running = True
     font = pygame.font.Font(os.path.join(os.getcwd(), 'comic.ttf'), 42)
-    # options = language["menu"]
-    # y_positions = [150, 200, 250, 300, 350]
-
 
     while running:
         options = language["menu"]
-        y_positions = [150, 200, 250, 300, 350]
+        y_positions = [100, 150, 200, 250, 300, 350]
 
         gameDisplay.blit(background, (0, 0)) 
          # Mouse coordinates
@@ -306,25 +293,35 @@ def main_menu(language):
                     if text_rect.collidepoint(event.pos):
                         print(f"Main menu option {options[index]} selected.")
                         if index == 0:
-                            menu_level(language)
+                            selected_level = menu_level(language)
+                            if selected_level:
+                                start_game(selected_level, language, player_lives, score)  
                         elif index == 1:
-                            rules(language)
+                            if 'level' not in locals():
+                                level = menu_level(language)  # Choose the level
+                            if level:
+                                start_game(level, language, player_lives, score)
                         elif index == 2:
+                            rules(language)
+                        elif index == 3:
                             new_language = menu_lang(language)
                             if new_language != language:
-                                language = change_language(new_language)  # Тепер передаємо нову мову
-                        elif index == 3:
-                            menu_history(language)
+                                language = change_language(new_language)  
                         elif index == 4:
+                            menu_history(language)
+                        elif index == 5:
                             quit_game(language)
                         # running = False
                         pygame.display.flip()
+                        clock.tick(FPS)
         
 def quit_game(language):
     pygame.quit()
     sys.exit()
 
 
+def start_game(selected_level, language, player_lives, score, data):
+    print("")
 
 #  Last message with score
 
@@ -333,3 +330,6 @@ def quit_game(language):
 language = change_language("en")
 main_menu(language)    
 pygame.quit()
+
+if __name__ == '__main_menu__':
+    main_menu()
