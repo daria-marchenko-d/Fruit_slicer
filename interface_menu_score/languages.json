@@ -1,7 +1,7 @@
 {
     "en": {
         "title": "FRUIT NINJA",
-        "menu": ["Level", "Rules", "Language", "Scores", "Exit"],
+        "menu": ["Level", "Play", "Rules", "Language", "Scores", "Exit"],
         "level": ["Light level", "Hard level", "Go back"],
         "rules": [
             "To cut an apple - press 'a'",
@@ -10,7 +10,8 @@
             "To cut a kiwi - press 'k'",
             "To cut a lemon - press 'l'",
             "To cut an orange - press 'o'",
-            "To cut a watermelon - press 'w'"
+            "To cut a watermelon - press 'w'",
+            "Go back"
         ],
         "Language": ["English", "French", "Ukrainian", "Go back"],
         "history": ["Delete history", "Go back"]
@@ -18,7 +19,7 @@
 
     "fr": {
         "title": "FRUIT NINJA",
-        "menu": ["Niveau", "Règles", "Langue", "Scores", "Quitter"],
+        "menu": ["Niveau", "Jouer", "Règles", "Langue", "Scores", "Quitter"],
         "level": ["Niveau léger", "Niveau difficile", "Retour"],
         "rules": [
             "Pour couper une pomme - appuyez sur 'a'",
@@ -36,7 +37,7 @@
 
     "uk": {
         "title": "ФРУКТОВИЙ НІНДЗЯ",
-        "menu": ["Рівень", "Правила", "Мова", "Рахунок", "Вихід"],
+        "menu": ["Рівень", "Грати", "Правила", "Мова", "Рахунок", "Вихід"],
         "level": ["Легкий", "Важкий", "Повернутися назад"],
         "rules": [
             "Щоб розрізати яблуко - натисніть 'a'",

@@ -133,7 +133,7 @@ if not os.path.exists("history.json"):
 
 def show_gameover_screen():
     gameDisplay.blit(background, (0,0))
-    draw_text(gameDisplay, "FRUIT NINJA!", 90, WIDTH / 2, HEIGHT / 4)
+    draw_text(gameDisplay, "FRUIT SLICER!", 90, WIDTH / 2, HEIGHT / 4)
     if not game_over :
         draw_text(gameDisplay,"Score : " + str(score), 50, WIDTH / 2, HEIGHT /2)
 

@@ -2,10 +2,11 @@ import pygame, sys
 import os
 import random
 import json
+import time
 
 player_lives = 3                                                #keep track of lives
 score = 0                                                        #keeps track of score
-fruits = ['melon', 'orange', 'pomegranate', 'guava', 'bomb', "ice-smiley"]     #entities in the game
+fruits = ['apple', 'orange', 'lemon', 'kiwi', 'watermelon', 'bomb', 'ice' ]    #entities in the game
 
 
 # Configure the window
@@ -38,7 +39,7 @@ background = pygame.transform.scale(background, (WIDTH, HEIGHT))
 
 font = pygame.font.Font(os.path.join(os.getcwd(), 'comic.ttf'), 32)
 # score_text = font.render('Score : ' + str(score), True, (255, 255, 255))
-lives_icon = pygame.image.load('images/white_lives.png')
+lives_icon = pygame.image.load('images/red_lives.png')
 
 # Add sounds and music
 music = pygame.mixer.music.load("sounds/music-game.mp3")
@@ -52,19 +53,27 @@ win_sound = pygame.mixer.Sound("sounds/fanfare.mp3")
 
 pygame.mixer.music.play(-1)
 
-# Generalized structure of the fruit Dictionary
+
+# 2. Generalize structure of the fruit of the dictionnary
 def generate_random_fruits(fruit, data):
-    fruit_path = "images/" + fruit + ".png"
-    data[fruit] = {
-        'img': pygame.image.load(fruit_path),
-        'x' : random.randint(100,500),          #where the fruit should be positioned on x-coordinate
-        'y' : 800,
-        'speed_x': random.randint(-10,10),      #how fast the fruit should move in x direction. Controls the diagonal movement of fruits
-        'speed_y': random.randint(-80, -60),    #control the speed of fruits in y-directionn ( UP )
-        'throw': False,                         #determines if the generated coordinate of the fruits is outside the gameDisplay or not. If outside, then it will be discarded
-        't': 0,                                 #manages the
-        'hit': False,
-    }
+    smiley_path = f"images/{fruit}-smiley.png"
+    sliced_path = f"images/{fruit}-sliced.png"
+
+
+    if os.path.exists(smiley_path) and os.path.exists(sliced_path):
+        original_size = (200, 200) 
+        data[fruit] = {
+            'img_smiley': pygame.transform.scale(pygame.image.load(smiley_path), original_size),
+            'img_sliced': pygame.transform.scale(pygame.image.load(sliced_path), original_size),
+            'current_img': pygame.transform.scale(pygame.image.load(smiley_path), original_size),
+            'x' : random.randint(100,500),
+            'y' : random.randint(-50, 20),
+            'speed_x': random.randint(-10,10),
+            'speed_y': random.randint(-90, -60),
+            'throw': random.random() >= 0.75,
+            't': 0,
+            'hit': False,
+        }
 
     if random.random() >= 0.75:     #Return the next random floating point number in the range [0.0, 1.0) to keep the fruits inside the gameDisplay
         data[fruit]['throw'] = True
@@ -77,7 +86,7 @@ for fruit in fruits:
     generate_random_fruits(fruit, data)
 
 def hide_cross_lives(x, y):
-    gameDisplay.blit(pygame.image.load("images/red_lives.png"), (x, y))
+    gameDisplay.blit(pygame.image.load("images/white_lives.png"), (x, y))
 
 # 3. Method to draw font 
 font_name = pygame.font.match_font('comic.ttf')
@@ -153,27 +162,37 @@ def menu_level(language):
     #     start_game(selected_level)
     return selected_level
 
-def start_game(level, language, player_lives, score, data):  # Додаємо аргумент level
+def start_game(level, language, player_lives, score, data):  # Add an argument level
     game_over = False
     player_lives = 3
     score = 0
     data.clear()
+    combo_hits = 0
+    time_paused = 0 
+    frame_count = 0
 
     for fruit in fruits:
         generate_random_fruits(fruit, data)
+    
 
     if level == "light":
-        # Налаштування для легкого рівня (наприклад, менша швидкість, більше життів)
+        fruit_spawn_rate = 30
         for fruit in data:
             data[fruit]['speed_y'] = random.randint(-70, -40)
     elif level == "hard":
-        # Налаштування для важкого рівня (наприклад, більша швидкість, менше життів)
+        fruit_spawn_rate = 15
         for fruit in data:
             data[fruit]['speed_y'] = random.randint(-100, -80)
 
     score_text = font.render('Score : ' + str(score), True, (255, 255, 255))
 
     while not game_over:
+        frame_count += 1
+
+        if time_paused > 0:
+            time_paused -= 1
+            continue
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -181,27 +200,48 @@ def start_game(level, language, player_lives, score, data):  # Додаємо а
 
             if event.type == pygame.KEYDOWN:
                 key_fruit_map = {
-                    pygame.K_m: 'melon',
+                    pygame.K_a: 'apple',
                     pygame.K_o: 'orange',
-                    pygame.K_p: 'pomegranate',
-                    pygame.K_g: 'guava',
+                    pygame.K_l: 'lemon',
+                    pygame.K_k: 'kiwi',
+                    pygame.K_w: 'watermelon',
                     pygame.K_b: 'bomb',
                     pygame.K_SPACE: 'ice'
                 }
                 if event.key in key_fruit_map:
                     fruit = key_fruit_map[event.key]
                     if fruit in data and not data[fruit]['hit']:
-                        data[fruit] = data[fruit]
+                        data[fruit]['current_img'] = data[fruit]['img_sliced']
+                        cut_sound.play()
                         data[fruit]['hit'] = True
-                        if fruit != 'bomb':
+
+                        if fruit == 'bomb':
+                            explosion_sound.play()  
+                            game_over = True  # end game
+                            show_gameover_screen(score, player_lives, language)  # game over screen
+                            return score, player_lives
+                        
+                        if fruit == 'ice':
+                            time_paused = random.randint(3, 5) * FPS  #stop the time for 3/5sec
+                            time_sound.play() 
+                        else:
                             score += 1
                         score_text = font.render('Score : ' + str(score), True, (255, 255, 255))
 
+
+                        if fruit != 'bomb':
+                            score += 1
+                        score_text = font.render('Score : ' + str(score), True, (255, 255, 255))
+                # if event.type == pygame.KEYDOWN:
+                    # pygame.K_ESCAPE: show_gameover_screen()
+
+        combo_hits = 0
         current_position = pygame.mouse.get_pos()
         for fruit, value in data.items():
             if not value['hit'] and value['x'] < current_position[0] < value['x'] + 30 and \
                     value['y'] < current_position[1] < value['y'] + 30:
                 if fruit == 'bomb':
+                    explosion_sound.play() 
                     player_lives -= 1
                     hide_cross_lives(player_lives)
                     if player_lives == 2:
@@ -211,13 +251,21 @@ def start_game(level, language, player_lives, score, data):  # Додаємо а
                     elif player_lives == 0:
                         hide_cross_lives(760, 15)
                         game_over = True
-                        show_gameover_screen(score, player_lives, language)  # Передаємо score, player_lives
+                        show_gameover_screen(score, player_lives, language)  
+                        return score, player_lives
+                elif fruit == 'ice':
+                        time_paused = random.randint(3, 5) * FPS  
+                        time_sound.play()
                 else:
-                    value['current_img'] = data[fruit]['img_sliced']  # Змінюємо зображення
+                    value['current_img'] = data[fruit]['img_sliced']  # Change image
                     value['hit'] = True
                     if fruit != 'bomb':
-                        score += 1
+                        combo_hits += 1
                     score_text = font.render('Score : ' + str(score), True, (255, 255, 255))
+
+            if combo_hits > 1:
+                score += combo_hits  # Додаємо бонусні очки за комбо
+                score_text = font.render('Score : ' + str(score), True, (255, 255, 255))
 
         gameDisplay.blit(background, (0, 0))
         gameDisplay.blit(score_text, (0, 0))
@@ -231,14 +279,17 @@ def start_game(level, language, player_lives, score, data):  # Додаємо а
                 value['t'] += 1
 
                 if value['y'] <= 850:
-                    gameDisplay.blit(value['img'], (value['x'], value['y']))
+                    gameDisplay.blit(value['current_img'], (value['x'], value['y']))
                 else:
-                    generate_random_fruits(key, data)  # Передаємо data
+                    generate_random_fruits(key, data)
+
+        if frame_count % fruit_spawn_rate == 0:
+            random_fruit = random.choice(fruits)
+            generate_random_fruits(random_fruit, data)
 
         pygame.display.update()
         clock.tick(FPS)
-
-    return score, player_lives  # Повертаємо score та player_lives
+    return score, player_lives  
 
 
 def show_gameover_screen(score, player_lives, language):
@@ -525,3 +576,5 @@ language = change_language("en")
 main_menu(language)    
 pygame.quit()
 
+if __name__ == '__main_menu__':
+    main_menu()
